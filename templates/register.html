@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}註冊｜校園 AI 學生資訊交換系統{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="card auth-card">
+    <h1>建立新帳號</h1>
+    <p class="muted">請填寫姓名、帳號、密碼、生日。若帳號重複，系統會提示已註冊過。</p>
+
+    <form method="post" action="{{ url_for('auth.register') }}">
+      <div class="field">
+        <label>姓名</label>
+        <input type="text" name="full_name" required>
+      </div>
+      <div class="field">
+        <label>帳號</label>
+        <input type="text" name="username" required>
+      </div>
+      <div class="field">
+        <label>密碼</label>
+        <input type="password" name="password" required>
+      </div>
+      <div class="field">
+        <label>生日</label>
+        <input type="date" name="birthday" required>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">完成註冊</button>
+        <a class="btn btn-outline" href="{{ url_for('index') }}">返回登入</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

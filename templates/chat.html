@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天系統｜Campus AI Hub</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
+        }
+        .topbar {
+            background: #111827;
+            border-bottom: 1px solid #334155;
+            padding: 14px 0;
+        }
+        .container {
+            width: min(1200px, 92%);
+            margin: 0 auto;
+        }
+        .topbar .container, .layout {
+            display: flex;
+            gap: 16px;
+        }
+        .topbar .container {
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .brand { color: white; }
+        .brand .muted { display: block; color: #94a3b8; font-size: 13px; margin-top: 4px; }
+        .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn {
+            border: none; border-radius: 10px; padding: 10px 14px;
+            cursor: pointer; text-decoration: none; display: inline-block;
+        }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-secondary { background: #334155; color: white; }
+        .btn-danger { background: #dc2626; color: white; }
+        .page { padding: 24px 0; }
+        .layout { align-items: flex-start; }
+        .sidebar, .main {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid #334155;
+            border-radius: 18px;
+            padding: 18px;
+        }
+        .sidebar { width: 340px; }
+        .main { flex: 1; min-height: 75vh; }
+        .section { margin-bottom: 22px; }
+        .section h3 { margin: 0 0 12px; }
+        input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            margin-bottom: 10px;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0 12px;
+            cursor: pointer;
+            width: fit-content;
+        }
+        .checkbox-row input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            padding: 0;
+            flex: 0 0 16px;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+        .list {
+            display: grid;
+            gap: 10px;
+        }
+        .item {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .message-list {
+            display: grid;
+            gap: 12px;
+            max-height: 460px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+        .message {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        .avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #64748b;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .meta {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+        .message-actions {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .file-box {
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: #1e293b;
+            border-radius: 8px;
+        }
+        .row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .row > * { flex: 1; }
+        .muted { color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="container">
+            <div class="brand">
+                <strong>Campus AI Hub</strong>
+                <span class="muted">聊天、好友、群組、社團</span>
+            </div>
+            <div class="actions">
+                <a class="btn btn-secondary" href="/dashboard">回首頁</a>
+                <a class="btn btn-secondary" href="/profile">個人資訊</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container page">
+        <div class="layout">
+            <aside class="sidebar">
+                <div class="section">
+                    <h3>搜尋使用者加好友</h3>
+                    <input id="searchInput" placeholder="輸入姓名、帳號或學號">
+                    <button class="btn btn-primary" onclick="searchUsers()">搜尋</button>
+                    <div id="searchResults" class="list" style="margin-top:10px;"></div>
+                </div>
+
+                <div class="section">
+                    <h3>好友邀請</h3>
+                    <div id="friendRequests" class="list"></div>
+                </div>
+
+                <div class="section">
+                    <h3>好友列表</h3>
+                    <div id="friendList" class="list"></div>
+                </div>
+
+                <div class="section">
+                    <h3>建立群組 / 社團</h3>
+                    <input id="roomName" placeholder="聊天室名稱">
+                    <input id="roomTopic" placeholder="主題">
+                    <select id="roomType">
+                        <option value="group">群組</option>
+                        <option value="club">社團</option>
+                    </select>
+                    <label class="checkbox-row"><input type="checkbox" id="requireApproval"><span>需要創立者同意加入</span></label>
+                    <button class="btn btn-primary" onclick="createRoom()">建立聊天室</button>
+                </div>
+
+                <div class="section">
+                    <h3>我的聊天室</h3>
+                    <div id="roomList" class="list"></div>
+                </div>
+            </aside>
+
+            <main class="main">
+                <h2 id="chatTitle">請選擇聊天室</h2>
+                <div id="messageList" class="message-list"></div>
+
+                <form id="messageForm">
+                    <textarea id="messageContent" placeholder="輸入訊息"></textarea>
+                    <input type="file" id="messageFile">
+                    <div class="row">
+                        <button type="submit" class="btn btn-primary">送出訊息</button>
+                    </div>
+                </form>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let currentRoomId = null;
+        let currentUserId = {{ current_user.id }};
+
+        function avatarHTML(name, avatar) {
+            if (avatar) return `<img src="${avatar}" class="avatar">`;
+            return `<div class="avatar">${name ? name[0] : "U"}</div>`;
+        }
+
+        async function fetchJSON(url, options = {}) {
+            const res = await fetch(url, options);
+            return await res.json();
+        }
+
+        async function searchUsers() {
+            const q = document.getElementById("searchInput").value.trim();
+            const result = await fetchJSON(`/api/chat/search-users?q=${encodeURIComponent(q)}`);
+            const box = document.getElementById("searchResults");
+            box.innerHTML = "";
+
+            result.data.forEach(user => {
+                box.innerHTML += `
+                    <div class="item">
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            ${avatarHTML(user.full_name, user.avatar_url)}
+                            <div>
+                                <div>${user.full_name}</div>
+                                <div class="muted">帳號：${user.username || ""} / 學號：${user.student_no || ""}</div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" style="margin-top:10px;" onclick="sendFriendRequest(${user.id})">加好友</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function sendFriendRequest(userId) {
+            const result = await fetchJSON("/api/chat/friends/request", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ target_user_id: userId })
+            });
+            alert(result.message);
+            loadFriendRequests();
+            loadFriends();
+        }
+
+        async function loadFriendRequests() {
+            const result = await fetchJSON("/api/chat/friends/requests");
+            const box = document.getElementById("friendRequests");
+            box.innerHTML = "";
+
+            if (!result.data.length) {
+                box.innerHTML = `<div class="muted">目前沒有好友邀請</div>`;
+                return;
+            }
+
+            result.data.forEach(req => {
+                box.innerHTML += `
+                    <div class="item">
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            ${avatarHTML(req.requester_name, req.requester_avatar)}
+                            <div>${req.requester_name}</div>
+                        </div>
+                        <div class="row" style="margin-top:10px;">
+                            <button class="btn btn-primary" onclick="respondFriendRequest(${req.id}, 'accept')">接受</button>
+                            <button class="btn btn-danger" onclick="respondFriendRequest(${req.id}, 'reject')">拒絕</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function respondFriendRequest(requestId, action) {
+            const result = await fetchJSON(`/api/chat/friends/respond/${requestId}`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ action })
+            });
+            alert(result.message);
+            loadFriendRequests();
+            loadFriends();
+            loadRooms();
+        }
+
+        async function loadFriends() {
+            const result = await fetchJSON("/api/chat/friends");
+            const box = document.getElementById("friendList");
+            box.innerHTML = "";
+
+            if (!result.data.length) {
+                box.innerHTML = `<div class="muted">目前沒有好友</div>`;
+                return;
+            }
+
+            result.data.forEach(friend => {
+                box.innerHTML += `
+                    <div class="item">
+                        <div style="display:flex;gap:10px;align-items:center;">
+                            ${avatarHTML(friend.full_name, friend.avatar_url)}
+                            <div>
+                                <div>${friend.full_name}</div>
+                                <div class="muted">${friend.student_no || ""}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function createRoom() {
+            const name = document.getElementById("roomName").value.trim();
+            const topic = document.getElementById("roomTopic").value.trim();
+            const room_type = document.getElementById("roomType").value;
+            const require_approval = document.getElementById("requireApproval").checked;
+
+            const result = await fetchJSON("/api/chat/rooms/create", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ name, topic, room_type, require_approval })
+            });
+
+            alert(result.message);
+            loadRooms();
+        }
+
+        async function loadRooms() {
+            const result = await fetchJSON("/api/chat/rooms");
+            const box = document.getElementById("roomList");
+            box.innerHTML = "";
+
+            if (!result.data.length) {
+                box.innerHTML = `<div class="muted">目前沒有聊天室</div>`;
+                return;
+            }
+
+            result.data.forEach(room => {
+                box.innerHTML += `
+                    <div class="item">
+                        <div><strong>${room.name}</strong></div>
+                        <div class="muted">${room.topic || ""}</div>
+                        <div class="muted">類型：${room.room_type} / 成員：${room.member_count}</div>
+                        <button class="btn btn-primary" style="margin-top:10px;" onclick="openRoom(${room.id}, '${room.name}')">進入聊天室</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function openRoom(roomId, roomName) {
+            currentRoomId = roomId;
+            document.getElementById("chatTitle").innerText = roomName;
+            loadMessages();
+        }
+
+        async function loadMessages() {
+            if (!currentRoomId) return;
+            const result = await fetchJSON(`/api/chat/rooms/${currentRoomId}/messages`);
+            const box = document.getElementById("messageList");
+            box.innerHTML = "";
+
+            if (!result.success) {
+                box.innerHTML = `<div class="muted">${result.message}</div>`;
+                return;
+            }
+
+            result.data.forEach(msg => {
+                const fileHTML = msg.file_url
+                    ? (msg.message_type === "image"
+                        ? `<div class="file-box"><img src="${msg.file_url}" style="max-width:220px;border-radius:10px;"></div>`
+                        : `<div class="file-box"><a href="${msg.file_url}" target="_blank">${msg.file_name || "下載檔案"}</a></div>`)
+                    : "";
+
+                const ownerButtons = msg.sender_id === currentUserId
+                    ? `<div class="message-actions">
+                            <button class="btn btn-secondary" onclick="editMessage(${msg.id}, \`${(msg.content || "").replace(/`/g, "\\`")}\`)">修改</button>
+                            <button class="btn btn-danger" onclick="deleteMessage(${msg.id})">刪除</button>
+                       </div>`
+                    : "";
+
+                box.innerHTML += `
+                    <div class="message">
+                        ${avatarHTML(msg.sender_name, msg.sender_avatar)}
+                        <div style="flex:1;">
+                            <div class="meta">${msg.sender_name} ・ ${msg.created_at}</div>
+                            <div>${msg.content || ""}</div>
+                            ${fileHTML}
+                            ${ownerButtons}
+                        </div>
+                    </div>
+                `;
+            });
+
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function editMessage(messageId, oldContent) {
+            const content = prompt("修改訊息內容", oldContent || "");
+            if (content === null) return;
+
+            const result = await fetchJSON(`/api/chat/messages/${messageId}/edit`, {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ content })
+            });
+
+            alert(result.message);
+            loadMessages();
+        }
+
+        async function deleteMessage(messageId) {
+            if (!confirm("確定要刪除這則訊息嗎？")) return;
+
+            const result = await fetchJSON(`/api/chat/messages/${messageId}/delete`, {
+                method: "POST"
+            });
+
+            alert(result.message);
+            loadMessages();
+        }
+
+        document.getElementById("messageForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            if (!currentRoomId) {
+                alert("請先選擇聊天室");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("content", document.getElementById("messageContent").value);
+            const file = document.getElementById("messageFile").files[0];
+            if (file) formData.append("file", file);
+
+            const res = await fetch(`/api/chat/rooms/${currentRoomId}/messages`, {
+                method: "POST",
+                body: formData
+            });
+            const result = await res.json();
+
+            alert(result.message);
+
+            if (result.success) {
+                document.getElementById("messageContent").value = "";
+                document.getElementById("messageFile").value = "";
+                loadMessages();
+            }
+        });
+
+        loadFriendRequests();
+        loadFriends();
+        loadRooms();
+    </script>
+</body>
+</html>

@@ -1,0 +1,605 @@
+{% extends "base.html" %}
+
+{% block title %}
+AI 智慧助手｜Campus AI Hub
+{% endblock %}
+
+
+{% block content %}
+
+<style>
+
+.ai-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            circle at top left,
+            rgba(37, 99, 235, .18),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #020617,
+            #0f172a,
+            #111827
+        );
+
+    padding: 40px 20px;
+}
+
+
+.ai-container {
+    width: min(1100px, 95%);
+    margin: auto;
+}
+
+
+.ai-header {
+    margin-bottom: 25px;
+}
+
+
+.ai-header h1 {
+    color: white;
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+
+.ai-header p {
+    color: #94a3b8;
+}
+
+
+.back-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+
+    padding: 10px 15px;
+
+    background: #334155;
+    color: white;
+
+    text-decoration: none;
+
+    border-radius: 10px;
+}
+
+
+.ai-card {
+
+    background:
+        rgba(
+            15,
+            23,
+            42,
+            .95
+        );
+
+    border:
+        1px solid
+        #334155;
+
+    border-radius: 20px;
+
+    padding: 24px;
+
+    margin-bottom: 20px;
+}
+
+
+.ai-summary {
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(
+                37,
+                99,
+                235,
+                .18
+            ),
+            rgba(
+                124,
+                58,
+                237,
+                .18
+            )
+        );
+
+    border:
+        1px solid
+        #4338ca;
+
+}
+
+
+.ai-summary-title {
+
+    color: #93c5fd;
+
+    font-size: 14px;
+
+    margin-bottom: 8px;
+
+}
+
+
+.ai-summary-content {
+
+    color: white;
+
+    font-size: 18px;
+
+    line-height: 1.7;
+
+}
+
+
+.question-box {
+
+    display: flex;
+
+    gap: 10px;
+
+}
+
+
+.question-input {
+
+    flex: 1;
+
+    padding: 15px;
+
+    background: #020617;
+
+    border:
+        1px solid
+        #475569;
+
+    border-radius: 12px;
+
+    color: white;
+
+    font-size: 15px;
+
+}
+
+
+.ask-btn {
+
+    padding:
+        12px
+        22px;
+
+    border: none;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #7c3aed
+        );
+
+    color: white;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+}
+
+
+.example-area {
+
+    margin-top: 15px;
+
+    display: flex;
+
+    gap: 8px;
+
+    flex-wrap: wrap;
+
+}
+
+
+.example {
+
+    padding:
+        7px
+        11px;
+
+    background: #1e293b;
+
+    border:
+        1px solid
+        #334155;
+
+    border-radius: 999px;
+
+    color: #cbd5e1;
+
+    cursor: pointer;
+
+    font-size: 12px;
+
+}
+
+
+.answer {
+
+    color: white;
+
+    font-size: 17px;
+
+    line-height: 1.7;
+
+}
+
+
+.result-title {
+
+    margin-top: 25px;
+
+    margin-bottom: 12px;
+
+    color: #94a3b8;
+
+}
+
+
+.post-card {
+
+    padding: 16px;
+
+    border:
+        1px solid
+        #334155;
+
+    background: #111827;
+
+    border-radius: 14px;
+
+    margin-top: 12px;
+
+}
+
+
+.post-top {
+
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    gap: 15px;
+
+}
+
+
+.post-title {
+
+    color: white;
+
+    font-weight: bold;
+
+    font-size: 17px;
+
+}
+
+
+.post-category {
+
+    color: #93c5fd;
+
+    font-size: 12px;
+
+}
+
+
+.post-content {
+
+    color: #cbd5e1;
+
+    margin-top: 10px;
+
+    line-height: 1.6;
+
+}
+
+
+.post-date {
+
+    margin-top: 10px;
+
+    color: #64748b;
+
+    font-size: 12px;
+
+}
+
+
+.priority {
+
+    color: #facc15;
+
+    font-size: 12px;
+
+}
+
+
+@media (
+    max-width: 700px
+) {
+
+    .question-box {
+
+        flex-direction:
+            column;
+
+    }
+
+}
+
+</style>
+
+
+<div class="ai-page">
+
+<div class="ai-container">
+
+
+<a
+    class="back-btn"
+    href="{{ url_for('dashboard') }}"
+>
+    ← 回首頁
+</a>
+
+
+<div class="ai-header">
+
+    <h1>
+        🤖 Campus AI 智慧助手
+    </h1>
+
+    <p>
+        從校園公告中搜尋、
+        分析並整理你需要的資訊。
+    </p>
+
+</div>
+
+
+<div class="ai-card ai-summary">
+
+    <div class="ai-summary-title">
+
+        ✨ AI 今日摘要
+
+    </div>
+
+    <div class="ai-summary-content">
+
+        {{ summary }}
+
+    </div>
+
+</div>
+
+
+<div class="ai-card">
+
+    <h2>
+        詢問 Campus AI
+    </h2>
+
+    <form
+        method="POST"
+    >
+
+        <div
+            class="question-box"
+        >
+
+            <input
+
+                id="questionInput"
+
+                class="question-input"
+
+                type="text"
+
+                name="question"
+
+                value="{{ question }}"
+
+                placeholder="例如：最近有什麼重要公告？"
+
+                required
+            >
+
+            <button
+                class="ask-btn"
+                type="submit"
+            >
+
+                🤖 詢問 AI
+
+            </button>
+
+        </div>
+
+    </form>
+
+
+    <div class="example-area">
+
+        <span
+            class="example"
+            onclick="setQuestion(
+                '最近有什麼公告？'
+            )"
+        >
+
+            最近公告
+
+        </span>
+
+
+        <span
+            class="example"
+            onclick="setQuestion(
+                '有什麼重要資訊？'
+            )"
+        >
+
+            重要資訊
+
+        </span>
+
+
+        <span
+            class="example"
+            onclick="setQuestion(
+                'AI 相關活動'
+            )"
+        >
+
+            AI 活動
+
+        </span>
+
+
+        <span
+            class="example"
+            onclick="setQuestion(
+                '比賽資訊'
+            )"
+        >
+
+            比賽資訊
+
+        </span>
+
+    </div>
+
+</div>
+
+
+{% if answer %}
+
+<div class="ai-card">
+
+    <h2>
+        🤖 AI 回答
+    </h2>
+
+    <div class="answer">
+
+        {{ answer }}
+
+    </div>
+
+
+    {% if result_posts %}
+
+        <div class="result-title">
+
+            找到的相關資訊
+
+        </div>
+
+
+        {% for post in result_posts %}
+
+        <div class="post-card">
+
+            <div class="post-top">
+
+                <div>
+
+                    <div class="post-title">
+
+                        {{ post.title }}
+
+                    </div>
+
+                    <div class="post-category">
+
+                        {{ post.category or "一般資訊" }}
+
+                    </div>
+
+                </div>
+
+
+                {% if post.is_ai_priority %}
+
+                    <div class="priority">
+
+                        ⭐ AI 優先
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <div class="post-content">
+
+                {{ post.content }}
+
+            </div>
+
+
+            <div class="post-date">
+
+                {% if post.created_at %}
+
+                    {{
+                        post.created_at.strftime(
+                            "%Y-%m-%d %H:%M"
+                        )
+                    }}
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+</div>
+
+{% endif %}
+
+
+</div>
+
+</div>
+
+
+<script>
+
+function setQuestion(
+    text
+) {
+
+    document
+        .getElementById(
+            "questionInput"
+        )
+        .value = text;
+
+}
+
+</script>
+
+{% endblock %}

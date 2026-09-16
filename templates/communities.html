@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}社團與群組{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>社團、群組與論壇</h1>
+
+    <a href="/dashboard">返回首頁</a>
+
+    <form method="get">
+        <input
+            type="text"
+            name="q"
+            placeholder="搜尋社團或群組"
+            value="{{ request.args.get('q', '') }}"
+        >
+
+        <select name="filter">
+            <option value="all">全部</option>
+            <option value="club">社團</option>
+            <option value="group">群組</option>
+            <option value="forum">論壇</option>
+        </select>
+
+        <button type="submit">搜尋</button>
+    </form>
+
+    <hr>
+
+    <h2>建立社團或群組</h2>
+
+    <form id="createCommunityForm">
+        <input name="name" placeholder="名稱" required>
+        <textarea name="description" placeholder="介紹"></textarea>
+
+        <select name="community_type">
+            <option value="club">社團</option>
+            <option value="group">群組</option>
+            <option value="forum">論壇</option>
+        </select>
+
+        <select name="join_mode" id="joinMode">
+            <option value="open">直接加入</option>
+            <option value="approval">需要審核</option>
+            <option value="password">需要密碼</option>
+            <option value="password_approval">密碼加審核</option>
+        </select>
+
+        <input
+            type="password"
+            name="password"
+            placeholder="加入密碼"
+        >
+
+        <button type="submit">建立</button>
+    </form>
+
+    <hr>
+
+    {% for community in communities %}
+    <div class="card">
+        <h3>{{ community.name }}</h3>
+        <p>{{ community.description }}</p>
+        <p>類型：{{ community.community_type }}</p>
+        <p>加入方式：{{ community.join_mode }}</p>
+        <p>成員：{{ community.members|length }}</p>
+
+        {% if community.id in joined_ids %}
+            <a href="/communities/{{ community.id }}"
+               class="btn btn-primary">
+                進入社群
+            </a>
+        {% else %}
+            <form
+                class="join-form"
+                data-id="{{ community.id }}"
+            >
+                {% if community.join_mode in ["password", "password_approval"] %}
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="輸入加入密碼"
+                >
+                {% endif %}
+
+                <button type="submit">加入</button>
+            </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document
+    .getElementById("createCommunityForm")
+    .addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const result = await fetch("/communities/create", {
+            method: "POST",
+            body: new FormData(this)
+        });
+
+        const data = await result.json();
+        alert(data.message);
+
+        if (data.success) {
+            location.reload();
+        }
+    });
+
+document.querySelectorAll(".join-form").forEach(form => {
+    form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const id = this.dataset.id;
+
+        const result = await fetch(
+            `/communities/${id}/join`,
+            {
+                method: "POST",
+                body: new FormData(this)
+            }
+        );
+
+        const data = await result.json();
+        alert(data.message);
+
+        if (data.success) {
+            location.reload();
+        }
+    });
+});
+</script>
+{% endblock %}

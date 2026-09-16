@@ -1,0 +1,1699 @@
+{% extends "base.html" %}
+{% block title %}{{ meeting.title }}｜視訊會議{% endblock %}
+
+{% block content %}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .meeting-page {
+        min-height: 100vh;
+        background: #020617;
+        color: #e2e8f0;
+        padding-bottom: 100px;
+    }
+
+    .meeting-header {
+        background: #0f172a;
+        border-bottom: 1px solid #334155;
+        padding: 14px 0;
+    }
+
+    .meeting-header-inner {
+        width: min(1400px, 95%);
+        margin: 0 auto;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .meeting-title h1 {
+        margin: 0;
+        color: white;
+        font-size: 21px;
+    }
+
+    .meeting-title p {
+        margin: 5px 0 0;
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    .meeting-status {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .status-badge {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: #14532d;
+        color: #bbf7d0;
+    }
+
+    .meeting-container {
+        width: min(1400px, 95%);
+        margin: 20px auto;
+    }
+
+    .meeting-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 280px;
+        gap: 16px;
+    }
+
+    .video-area {
+        min-width: 0;
+    }
+
+    .video-grid {
+        display: grid;
+        grid-template-columns:
+            repeat(
+                auto-fit,
+                minmax(300px, 1fr)
+            );
+        gap: 12px;
+    }
+
+    .video-card {
+        position: relative;
+        overflow: hidden;
+
+        min-height: 260px;
+
+        background: #111827;
+
+        border:
+            1px solid
+            #334155;
+
+        border-radius: 16px;
+    }
+
+    .video-card video {
+        width: 100%;
+        height: 100%;
+        min-height: 260px;
+        object-fit: cover;
+        background: black;
+        display: block;
+    }
+
+    .video-name {
+        position: absolute;
+        left: 12px;
+        bottom: 12px;
+
+        background:
+            rgba(
+                2,
+                6,
+                23,
+                0.75
+            );
+
+        color: white;
+
+        border-radius: 8px;
+        padding: 6px 9px;
+
+        font-size: 12px;
+    }
+
+    .local-label {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+
+        border-radius: 999px;
+
+        padding: 5px 9px;
+
+        font-size: 11px;
+
+        background: #1d4ed8;
+        color: white;
+    }
+
+    .participants-panel {
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 16px;
+        padding: 16px;
+    }
+
+    .participants-panel h3 {
+        margin: 0 0 14px;
+        color: white;
+    }
+
+    .participant-count {
+        color: #94a3b8;
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+
+    .participant-list {
+        display: grid;
+        gap: 8px;
+    }
+
+    .participant-item {
+        background: #111827;
+
+        border:
+            1px solid
+            #334155;
+
+        border-radius: 10px;
+
+        padding: 10px;
+
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    .participant-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background: #334155;
+        color: white;
+        font-weight: bold;
+    }
+
+    .participant-name {
+        color: #e2e8f0;
+        font-size: 13px;
+    }
+
+    .creator-tag {
+        color: #fde68a;
+        font-size: 10px;
+    }
+
+    .meeting-controls {
+        position: fixed;
+
+        left: 50%;
+        bottom: 20px;
+
+        transform:
+            translateX(-50%);
+
+        z-index: 50;
+
+        display: flex;
+        gap: 9px;
+        flex-wrap: wrap;
+        justify-content: center;
+
+        background:
+            rgba(
+                15,
+                23,
+                42,
+                0.95
+            );
+
+        border:
+            1px solid
+            #334155;
+
+        border-radius: 18px;
+
+        padding: 10px;
+
+        box-shadow:
+            0 15px 50px
+            rgba(0, 0, 0, 0.4);
+    }
+
+    .control-btn {
+        border: none;
+
+        min-width: 105px;
+
+        border-radius: 12px;
+        padding: 11px 14px;
+
+        cursor: pointer;
+        font-weight: 600;
+
+        background: #334155;
+        color: white;
+
+        transition: 0.2s;
+    }
+
+    .control-btn:hover {
+        background: #475569;
+    }
+
+    .control-btn.off {
+        background: #7f1d1d;
+    }
+
+    .control-btn.danger {
+        background: #dc2626;
+    }
+
+    .control-btn.danger:hover {
+        background: #b91c1c;
+    }
+
+    .notice {
+        background: #1e293b;
+
+        border:
+            1px solid
+            #475569;
+
+        border-radius: 11px;
+
+        padding: 11px;
+
+        margin-bottom: 13px;
+
+        color: #cbd5e1;
+
+        font-size: 12px;
+    }
+
+    .creator-dialog {
+        position: fixed;
+
+        inset: 0;
+
+        z-index: 100;
+
+        display: none;
+
+        align-items: center;
+        justify-content: center;
+
+        background:
+            rgba(
+                0,
+                0,
+                0,
+                0.7
+            );
+    }
+
+    .creator-dialog.show {
+        display: flex;
+    }
+
+    .dialog-box {
+        width:
+            min(
+                430px,
+                92%
+            );
+
+        background: #0f172a;
+
+        border:
+            1px solid
+            #475569;
+
+        border-radius: 18px;
+
+        padding: 22px;
+    }
+
+    .dialog-box h2 {
+        color: white;
+        margin-top: 0;
+    }
+
+    .dialog-box p {
+        color: #94a3b8;
+        line-height: 1.7;
+    }
+
+    .dialog-actions {
+        display: grid;
+        gap: 9px;
+        margin-top: 18px;
+    }
+
+    @media (
+        max-width: 900px
+    ) {
+
+        .meeting-layout {
+            grid-template-columns:
+                1fr;
+        }
+
+        .participants-panel {
+            order: -1;
+        }
+    }
+
+    @media (
+        max-width: 600px
+    ) {
+
+        .video-grid {
+            grid-template-columns:
+                1fr;
+        }
+
+        .video-card {
+            min-height: 220px;
+        }
+
+        .video-card video {
+            min-height: 220px;
+        }
+
+        .control-btn {
+            min-width: 70px;
+            font-size: 11px;
+        }
+    }
+</style>
+
+
+<div class="meeting-page">
+
+    <header class="meeting-header">
+
+        <div class="meeting-header-inner">
+
+            <div class="meeting-title">
+
+                <h1>
+                    🎥 {{ meeting.title }}
+                </h1>
+
+                <p>
+                    會議代碼：
+                    {{ meeting.meeting_code }}
+
+                    ・
+
+                    {% if meeting.meeting_type == "video" %}
+                        視訊會議
+                    {% else %}
+                        語音會議
+                    {% endif %}
+                </p>
+
+            </div>
+
+            <div class="meeting-status">
+
+                <span class="status-badge">
+                    ● 會議進行中
+                </span>
+
+                {% if current_user.id == meeting.created_by %}
+                <span class="status-badge">
+                    👑 你是建立者
+                </span>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <div class="meeting-container">
+
+        <div class="notice">
+            第一次進入時，瀏覽器會詢問是否允許使用攝影機與麥克風。
+            請選擇「允許」。
+        </div>
+
+
+        <div class="meeting-layout">
+
+            <main class="video-area">
+
+                <div
+                    id="videoGrid"
+                    class="video-grid"
+                >
+
+                    <!-- 自己 -->
+                    <div
+                        class="video-card"
+                        id="localVideoCard"
+                    >
+
+                        <video
+                            id="localVideo"
+                            autoplay
+                            muted
+                            playsinline
+                        ></video>
+
+                        <div class="video-name">
+                            {{ current_user.full_name }}
+                        </div>
+
+                        <div class="local-label">
+                            你
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </main>
+
+
+            <aside class="participants-panel">
+
+                <h3>
+                    👥 參與者
+                </h3>
+
+                <div
+                    id="participantCount"
+                    class="participant-count"
+                >
+                    目前 1 人
+                </div>
+
+                <div
+                    id="participantList"
+                    class="participant-list"
+                ></div>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+
+    <!-- 下方按鈕 -->
+    <div class="meeting-controls">
+
+        <button
+            id="microphoneButton"
+            class="control-btn"
+        >
+            🎤 麥克風
+        </button>
+
+        {% if meeting.meeting_type == "video" %}
+
+        <button
+            id="cameraButton"
+            class="control-btn"
+        >
+            📷 攝影機
+        </button>
+
+        <button
+            id="screenButton"
+            class="control-btn"
+        >
+            🖥 分享畫面
+        </button>
+
+        {% endif %}
+
+        <button
+            id="leaveButton"
+            class="control-btn danger"
+        >
+            🚪 離開會議
+        </button>
+
+    </div>
+
+
+    <!-- 建立者退出詢問 -->
+    <div
+        id="creatorDialog"
+        class="creator-dialog"
+    >
+
+        <div class="dialog-box">
+
+            <h2>
+                你是會議建立者
+            </h2>
+
+            <p>
+                你可以只退出自己的會議，
+                讓其他參與者繼續；
+                也可以直接結束整個會議。
+            </p>
+
+            <div class="dialog-actions">
+
+                <button
+                    id="leaveOnlyButton"
+                    class="control-btn"
+                >
+                    只退出自己
+                </button>
+
+                <button
+                    id="closeAllButton"
+                    class="control-btn danger"
+                >
+                    結束所有人的會議
+                </button>
+
+                <button
+                    id="cancelLeaveButton"
+                    class="control-btn"
+                >
+                    取消
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+<script>
+    const meetingId =
+        {{ meeting.id }};
+
+    const currentUserId =
+        {{ current_user.id }};
+
+    const currentUserName =
+        {{ current_user.full_name | tojson }};
+
+    const creatorId =
+        {{ meeting.created_by }};
+
+    const meetingType =
+        {{ meeting.meeting_type | tojson }};
+
+
+    const socket = io();
+
+
+    let localStream = null;
+
+    let screenStream = null;
+
+    let isLeaving = false;
+
+
+    /*
+     * 每一位遠端使用者都有
+     * 一個 RTCPeerConnection
+     */
+    const peers = new Map();
+
+
+    /*
+     * socket sid → user
+     */
+    const remoteUsers =
+        new Map();
+
+
+    const rtcConfiguration = {
+        iceServers: [
+            {
+                urls:
+                    "stun:stun.l.google.com:19302"
+            }
+        ]
+    };
+
+
+    async function startLocalMedia() {
+
+        try {
+
+            localStream =
+                await navigator
+                    .mediaDevices
+                    .getUserMedia({
+                        video:
+                            meetingType ===
+                            "video",
+
+                        audio: true
+                    });
+
+            document
+                .getElementById(
+                    "localVideo"
+                )
+                .srcObject =
+                    localStream;
+
+            socket.emit(
+                "join_meeting",
+                {
+                    meeting_id:
+                        meetingId
+                }
+            );
+
+        } catch (error) {
+
+            alert(
+                "無法使用攝影機或麥克風："
+                + error.message
+            );
+        }
+    }
+
+
+    function createPeer(
+        socketId,
+        userInfo
+    ) {
+
+        if (
+            peers.has(socketId)
+        ) {
+
+            return peers.get(
+                socketId
+            );
+        }
+
+
+        const peer =
+            new RTCPeerConnection(
+                rtcConfiguration
+            );
+
+
+        if (localStream) {
+
+            localStream
+                .getTracks()
+                .forEach(track => {
+
+                    peer.addTrack(
+                        track,
+                        localStream
+                    );
+                });
+        }
+
+
+        peer.onicecandidate =
+            event => {
+
+                if (
+                    event.candidate
+                ) {
+
+                    socket.emit(
+                        "webrtc_ice_candidate",
+                        {
+                            target_sid:
+                                socketId,
+
+                            candidate:
+                                event.candidate
+                        }
+                    );
+                }
+            };
+
+
+        peer.ontrack =
+            event => {
+
+                addRemoteVideo(
+                    socketId,
+                    userInfo,
+                    event.streams[0]
+                );
+            };
+
+
+        peer.onconnectionstatechange =
+            () => {
+
+                if (
+                    [
+                        "failed",
+                        "closed",
+                        "disconnected"
+                    ].includes(
+                        peer.connectionState
+                    )
+                ) {
+
+                    removeRemotePeer(
+                        socketId
+                    );
+                }
+            };
+
+
+        peers.set(
+            socketId,
+            peer
+        );
+
+
+        return peer;
+    }
+
+
+    function addRemoteVideo(
+        socketId,
+        userInfo,
+        stream
+    ) {
+
+        let card =
+            document.getElementById(
+                `remote-${socketId}`
+            );
+
+
+        if (!card) {
+
+            card =
+                document.createElement(
+                    "div"
+                );
+
+            card.className =
+                "video-card";
+
+            card.id =
+                `remote-${socketId}`;
+
+
+            const video =
+                document.createElement(
+                    "video"
+                );
+
+            video.autoplay = true;
+            video.playsInline = true;
+
+
+            const name =
+                document.createElement(
+                    "div"
+                );
+
+            name.className =
+                "video-name";
+
+            name.textContent =
+                userInfo?.full_name ||
+                "參與者";
+
+
+            card.appendChild(
+                video
+            );
+
+            card.appendChild(
+                name
+            );
+
+
+            document
+                .getElementById(
+                    "videoGrid"
+                )
+                .appendChild(
+                    card
+                );
+        }
+
+
+        const video =
+            card.querySelector(
+                "video"
+            );
+
+        video.srcObject =
+            stream;
+    }
+
+
+    function removeRemotePeer(
+        socketId
+    ) {
+
+        const peer =
+            peers.get(
+                socketId
+            );
+
+        if (peer) {
+
+            peer.close();
+
+            peers.delete(
+                socketId
+            );
+        }
+
+
+        const card =
+            document.getElementById(
+                `remote-${socketId}`
+            );
+
+        if (card) {
+            card.remove();
+        }
+
+
+        remoteUsers.delete(
+            socketId
+        );
+
+
+        renderParticipants();
+    }
+
+
+    function renderParticipants() {
+
+        const list =
+            document.getElementById(
+                "participantList"
+            );
+
+        list.innerHTML = "";
+
+
+        /*
+         * 自己
+         */
+        addParticipantItem(
+            list,
+            {
+                user_id:
+                    currentUserId,
+
+                full_name:
+                    currentUserName
+            }
+        );
+
+
+        remoteUsers
+            .forEach(user => {
+
+                addParticipantItem(
+                    list,
+                    user
+                );
+            });
+
+
+        document
+            .getElementById(
+                "participantCount"
+            )
+            .textContent =
+                `目前 ${
+                    remoteUsers.size + 1
+                } 人`;
+    }
+
+
+    function addParticipantItem(
+        list,
+        user
+    ) {
+
+        const item =
+            document.createElement(
+                "div"
+            );
+
+        item.className =
+            "participant-item";
+
+
+        const first =
+            String(
+                user.full_name ||
+                "U"
+            ).charAt(0);
+
+
+        const creatorText =
+            Number(
+                user.user_id
+            ) === creatorId
+                ? `
+                    <div
+                        class="creator-tag"
+                    >
+                        👑 建立者
+                    </div>
+                `
+                : "";
+
+
+        item.innerHTML = `
+            <div
+                class="
+                    participant-avatar
+                "
+            >
+                ${escapeHTML(first)}
+            </div>
+
+            <div>
+                <div
+                    class="
+                        participant-name
+                    "
+                >
+                    ${escapeHTML(
+                        user.full_name ||
+                        "使用者"
+                    )}
+                </div>
+
+                ${creatorText}
+            </div>
+        `;
+
+
+        list.appendChild(
+            item
+        );
+    }
+
+
+    function escapeHTML(value) {
+
+        return String(
+            value ?? ""
+        )
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+    }
+
+
+    /*
+     * 有人加入
+     */
+    socket.on(
+        "participant_joined",
+        async data => {
+
+            remoteUsers.set(
+                data.socket_id,
+                {
+                    user_id:
+                        data.user_id,
+
+                    full_name:
+                        data.full_name,
+
+                    avatar_url:
+                        data.avatar_url
+                }
+            );
+
+
+            renderParticipants();
+
+
+            const peer =
+                createPeer(
+                    data.socket_id,
+                    data
+                );
+
+
+            const offer =
+                await peer
+                    .createOffer();
+
+
+            await peer
+                .setLocalDescription(
+                    offer
+                );
+
+
+            socket.emit(
+                "webrtc_offer",
+                {
+                    target_sid:
+                        data.socket_id,
+
+                    offer:
+                        offer
+                }
+            );
+        }
+    );
+
+
+    /*
+     * 收到 Offer
+     */
+    socket.on(
+        "webrtc_offer",
+        async data => {
+
+            const senderSid =
+                data.sender_sid;
+
+
+            let remoteUser =
+                remoteUsers.get(
+                    senderSid
+                );
+
+
+            if (!remoteUser) {
+
+                remoteUser = {
+                    user_id:
+                        data.sender_user_id,
+
+                    full_name:
+                        "參與者"
+                };
+
+
+                remoteUsers.set(
+                    senderSid,
+                    remoteUser
+                );
+            }
+
+
+            const peer =
+                createPeer(
+                    senderSid,
+                    remoteUser
+                );
+
+
+            await peer
+                .setRemoteDescription(
+                    data.offer
+                );
+
+
+            const answer =
+                await peer
+                    .createAnswer();
+
+
+            await peer
+                .setLocalDescription(
+                    answer
+                );
+
+
+            socket.emit(
+                "webrtc_answer",
+                {
+                    target_sid:
+                        senderSid,
+
+                    answer:
+                        answer
+                }
+            );
+
+
+            renderParticipants();
+        }
+    );
+
+
+    /*
+     * Answer
+     */
+    socket.on(
+        "webrtc_answer",
+        async data => {
+
+            const peer =
+                peers.get(
+                    data.sender_sid
+                );
+
+
+            if (!peer) {
+                return;
+            }
+
+
+            await peer
+                .setRemoteDescription(
+                    data.answer
+                );
+        }
+    );
+
+
+    /*
+     * ICE
+     */
+    socket.on(
+        "webrtc_ice_candidate",
+        async data => {
+
+            const peer =
+                peers.get(
+                    data.sender_sid
+                );
+
+
+            if (
+                !peer ||
+                !data.candidate
+            ) {
+                return;
+            }
+
+
+            try {
+
+                await peer
+                    .addIceCandidate(
+                        data.candidate
+                    );
+
+            } catch (error) {
+
+                console.error(
+                    error
+                );
+            }
+        }
+    );
+
+
+    /*
+     * 有人退出
+     */
+    socket.on(
+        "participant_left",
+        data => {
+
+            if (
+                data.socket_id
+            ) {
+
+                removeRemotePeer(
+                    data.socket_id
+                );
+            }
+        }
+    );
+
+
+    /*
+     * 建立者關閉全部
+     */
+    socket.on(
+        "meeting_closed",
+        data => {
+
+            isLeaving = true;
+
+            stopAllMedia();
+
+            alert(
+                data.message ||
+                "會議已結束"
+            );
+
+            location.href =
+                "/meetings/";
+        }
+    );
+
+
+    /*
+     * 麥克風
+     */
+    document
+        .getElementById(
+            "microphoneButton"
+        )
+        .addEventListener(
+            "click",
+            function () {
+
+                if (!localStream) {
+                    return;
+                }
+
+
+                const track =
+                    localStream
+                        .getAudioTracks()[0];
+
+
+                if (!track) {
+                    return;
+                }
+
+
+                track.enabled =
+                    !track.enabled;
+
+
+                this.classList.toggle(
+                    "off",
+                    !track.enabled
+                );
+
+
+                this.textContent =
+                    track.enabled
+                        ? "🎤 麥克風"
+                        : "🔇 已靜音";
+            }
+        );
+
+
+    /*
+     * 攝影機
+     */
+    const cameraButton =
+        document.getElementById(
+            "cameraButton"
+        );
+
+
+    if (cameraButton) {
+
+        cameraButton
+            .addEventListener(
+                "click",
+                function () {
+
+                    if (!localStream) {
+                        return;
+                    }
+
+
+                    const track =
+                        localStream
+                            .getVideoTracks()[0];
+
+
+                    if (!track) {
+                        return;
+                    }
+
+
+                    track.enabled =
+                        !track.enabled;
+
+
+                    this.classList.toggle(
+                        "off",
+                        !track.enabled
+                    );
+
+
+                    this.textContent =
+                        track.enabled
+                            ? "📷 攝影機"
+                            : "📷 已關閉";
+                }
+            );
+    }
+
+
+    /*
+     * 螢幕分享
+     */
+    const screenButton =
+        document.getElementById(
+            "screenButton"
+        );
+
+
+    if (screenButton) {
+
+        screenButton
+            .addEventListener(
+                "click",
+                async function () {
+
+                    try {
+
+                        screenStream =
+                            await navigator
+                                .mediaDevices
+                                .getDisplayMedia({
+                                    video: true
+                                });
+
+
+                        const screenTrack =
+                            screenStream
+                                .getVideoTracks()[0];
+
+
+                        peers
+                            .forEach(
+                                async peer => {
+
+                                    const sender =
+                                        peer
+                                            .getSenders()
+                                            .find(
+                                                item =>
+                                                    item.track &&
+                                                    item.track.kind
+                                                    ===
+                                                    "video"
+                                            );
+
+
+                                    if (sender) {
+
+                                        await sender
+                                            .replaceTrack(
+                                                screenTrack
+                                            );
+                                    }
+                                }
+                            );
+
+
+                        document
+                            .getElementById(
+                                "localVideo"
+                            )
+                            .srcObject =
+                                screenStream;
+
+
+                        screenTrack.onended =
+                            restoreCamera;
+
+                    } catch (error) {
+
+                        console.log(
+                            error
+                        );
+                    }
+                }
+            );
+    }
+
+
+    async function restoreCamera() {
+
+        if (!localStream) {
+            return;
+        }
+
+
+        const cameraTrack =
+            localStream
+                .getVideoTracks()[0];
+
+
+        if (!cameraTrack) {
+            return;
+        }
+
+
+        for (
+            const peer
+            of peers.values()
+        ) {
+
+            const sender =
+                peer
+                    .getSenders()
+                    .find(
+                        item =>
+                            item.track &&
+                            item.track.kind
+                            === "video"
+                    );
+
+
+            if (sender) {
+
+                await sender
+                    .replaceTrack(
+                        cameraTrack
+                    );
+            }
+        }
+
+
+        document
+            .getElementById(
+                "localVideo"
+            )
+            .srcObject =
+                localStream;
+    }
+
+
+    /*
+     * 離開
+     */
+    document
+        .getElementById(
+            "leaveButton"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                if (
+                    currentUserId
+                    === creatorId
+                ) {
+
+                    document
+                        .getElementById(
+                            "creatorDialog"
+                        )
+                        .classList
+                        .add(
+                            "show"
+                        );
+
+                } else {
+
+                    leaveMeeting(
+                        false
+                    );
+                }
+            }
+        );
+
+
+    document
+        .getElementById(
+            "leaveOnlyButton"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                leaveMeeting(
+                    false
+                );
+            }
+        );
+
+
+    document
+        .getElementById(
+            "closeAllButton"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                leaveMeeting(
+                    true
+                );
+            }
+        );
+
+
+    document
+        .getElementById(
+            "cancelLeaveButton"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                document
+                    .getElementById(
+                        "creatorDialog"
+                    )
+                    .classList
+                    .remove(
+                        "show"
+                    );
+            }
+        );
+
+
+    function leaveMeeting(
+        closeForAll
+    ) {
+
+        if (isLeaving) {
+            return;
+        }
+
+
+        isLeaving = true;
+
+
+        socket.emit(
+            "leave_meeting",
+            {
+                meeting_id:
+                    meetingId,
+
+                close_for_all:
+                    closeForAll
+            }
+        );
+
+
+        stopAllMedia();
+
+
+        setTimeout(
+            () => {
+
+                location.href =
+                    "/meetings/";
+
+            },
+            300
+        );
+    }
+
+
+    function stopAllMedia() {
+
+        if (localStream) {
+
+            localStream
+                .getTracks()
+                .forEach(
+                    track =>
+                        track.stop()
+                );
+        }
+
+
+        if (screenStream) {
+
+            screenStream
+                .getTracks()
+                .forEach(
+                    track =>
+                        track.stop()
+                );
+        }
+
+
+        peers.forEach(
+            peer =>
+                peer.close()
+        );
+
+
+        peers.clear();
+    }
+
+
+    /*
+     * 關閉分頁
+     */
+    window.addEventListener(
+        "beforeunload",
+        () => {
+
+            if (isLeaving) {
+                return;
+            }
+
+
+            socket.emit(
+                "leave_meeting",
+                {
+                    meeting_id:
+                        meetingId,
+
+                    close_for_all:
+                        false
+                }
+            );
+        }
+    );
+
+
+    renderParticipants();
+
+    startLocalMedia();
+</script>
+
+{% endblock %}

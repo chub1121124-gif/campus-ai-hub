@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}語音與視訊會議{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>語音與視訊會議</h1>
+
+    <a href="/dashboard">返回首頁</a>
+
+    <form id="meetingForm">
+        <input
+            type="text"
+            name="title"
+            placeholder="會議名稱"
+            required
+        >
+
+        <select name="meeting_type">
+            <option value="video">視訊會議</option>
+            <option value="audio">語音會議</option>
+        </select>
+
+        <input
+            type="password"
+            name="password"
+            placeholder="會議密碼，可不填"
+        >
+
+        <button type="submit">建立會議</button>
+    </form>
+
+    <hr>
+
+    {% for meeting in meetings %}
+    <div class="card">
+        <h3>{{ meeting.title }}</h3>
+        <p>類型：{{ meeting.meeting_type }}</p>
+        <p>狀態：{{ meeting.status }}</p>
+
+        <a href="/meetings/{{ meeting.id }}">
+            加入會議
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+document
+    .getElementById("meetingForm")
+    .addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const response = await fetch("/meetings/create", {
+            method: "POST",
+            body: new FormData(this)
+        });
+
+        const data = await response.json();
+        alert(data.message);
+
+        if (data.success) {
+            location.href = `/meetings/${data.meeting_id}`;
+        }
+    });
+</script>
+{% endblock %}

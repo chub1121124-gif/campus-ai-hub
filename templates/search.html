@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}全站搜尋｜Campus AI{% endblock %}
+{% block content %}
+<style>
+.search-page{max-width:1150px;margin:35px auto;padding:0 20px}.search-hero{background:linear-gradient(135deg,#172554,#312e81);border-radius:22px;padding:28px;color:white;margin-bottom:22px}.search-form{display:flex;gap:10px;margin-top:18px}.search-input{flex:1;padding:14px 16px;border:1px solid #475569;border-radius:12px;font-size:16px}.search-btn{border:0;border-radius:12px;padding:0 22px;background:#2563eb;color:white;font-weight:700}.section{background:white;border:1px solid #e2e8f0;border-radius:18px;padding:20px;margin-bottom:18px}.result{padding:15px 0;border-bottom:1px solid #e2e8f0}.result:last-child{border:0}.result-title{font-size:17px;font-weight:700;color:#0f172a;text-decoration:none}.meta{font-size:13px;color:#64748b;margin-top:5px}.desc{color:#475569;margin-top:7px}.empty{text-align:center;color:#64748b;padding:28px}.badge{padding:3px 8px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:12px}.back{color:white;text-decoration:none}@media(max-width:650px){.search-form{flex-direction:column}.search-btn{padding:13px}}
+</style>
+<div class="search-page">
+<div class="search-hero">
+<a class="back" href="{{ url_for('dashboard') }}">← 回首頁</a>
+<h1>🔍 Campus AI 全站搜尋</h1><p>一次搜尋公告、筆記、學生與社團。</p>
+<form class="search-form" method="GET" action="{{ url_for('global_search') }}">
+<input class="search-input" type="search" name="q" value="{{ keyword }}" placeholder="例如：AI、Python、競賽、王小明" required>
+<button class="search-btn">搜尋</button></form></div>
+
+{% if keyword %}
+<p>「{{ keyword }}」共找到 <strong>{{ total_results }}</strong> 筆結果</p>
+{% if total_results == 0 %}<div class="section empty">找不到相關資料，請換一個關鍵字。</div>{% endif %}
+
+{% if posts %}<div class="section"><h2>📢 公告 <span class="badge">{{ posts|length }}</span></h2>
+{% for post in posts %}<div class="result"><div class="result-title">{{ post.title }}</div><div class="meta">{{ post.category or '一般資訊' }}{% if post.author %} · {{ post.author.full_name }}{% endif %}</div><div class="desc">{{ post.content|truncate(180) }}</div></div>{% endfor %}</div>{% endif %}
+
+{% if notes %}<div class="section"><h2>📝 筆記 <span class="badge">{{ notes|length }}</span></h2>
+{% for note in notes %}<div class="result"><div class="result-title">{{ note.title }}</div><div class="meta">{{ note.category or '一般筆記' }}{% if note.owner %} · {{ note.owner.full_name }}{% endif %}</div><div class="desc">{{ note.content|truncate(180) }}</div></div>{% endfor %}</div>{% endif %}
+
+{% if users %}<div class="section"><h2>👤 學生 <span class="badge">{{ users|length }}</span></h2>
+{% for user in users %}<div class="result"><a class="result-title" href="{{ url_for('public_user_profile', user_id=user.id) }}">{{ user.full_name }}</a><div class="meta">@{{ user.username }}{% if user.student_no %} · {{ user.student_no }}{% endif %}{% if user.department %} · {{ user.department.name }}{% endif %}</div>{% if user.interests %}<div class="desc">興趣：{{ user.interests }}</div>{% endif %}</div>{% endfor %}</div>{% endif %}
+
+{% if communities %}<div class="section"><h2>👥 社團 / 群組 <span class="badge">{{ communities|length }}</span></h2>
+{% for community in communities %}<div class="result"><div class="result-title">{{ community.name }}</div><div class="meta">{{ community.community_type }}</div><div class="desc">{{ community.description or '沒有說明' }}</div></div>{% endfor %}</div>{% endif %}
+{% else %}<div class="section empty">請在上方輸入關鍵字開始搜尋。</div>{% endif %}
+</div>
+{% endblock %}

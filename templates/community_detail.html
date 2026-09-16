@@ -1,0 +1,729 @@
+{% extends "base.html" %}
+{% block title %}{{ community.name }}｜Campus AI Hub{% endblock %}
+
+{% block content %}
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .community-page {
+        min-height: 100vh;
+        background:
+            radial-gradient(
+                circle at top left,
+                rgba(37, 99, 235, 0.15),
+                transparent 35%
+            ),
+            linear-gradient(
+                135deg,
+                #020617,
+                #0f172a 55%,
+                #111827
+            );
+        color: #e2e8f0;
+        padding-bottom: 50px;
+    }
+
+    .community-header {
+        background: rgba(15, 23, 42, 0.96);
+        border-bottom: 1px solid #334155;
+        padding: 18px 0;
+    }
+
+    .community-header-inner {
+        width: min(1300px, 94%);
+        margin: 0 auto;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .community-title h1 {
+        margin: 0;
+        color: white;
+        font-size: 25px;
+    }
+
+    .community-title p {
+        margin: 6px 0 0;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .btn {
+        border: none;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-secondary {
+        background: #334155;
+        color: white;
+    }
+
+    .btn-danger {
+        background: #dc2626;
+        color: white;
+    }
+
+    .community-container {
+        width: min(1300px, 94%);
+        margin: 0 auto;
+        padding-top: 22px;
+    }
+
+    .community-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .panel {
+        background: rgba(15, 23, 42, 0.96);
+        border: 1px solid #334155;
+        border-radius: 18px;
+        padding: 18px;
+        margin-bottom: 18px;
+    }
+
+    .panel h2 {
+        margin-top: 0;
+        color: white;
+        font-size: 19px;
+    }
+
+    .community-info {
+        display: grid;
+        gap: 12px;
+    }
+
+    .info-row {
+        background: #111827;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 13px;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-size: 11px;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        color: #e2e8f0;
+        line-height: 1.6;
+        font-size: 13px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        margin-right: 5px;
+    }
+
+    .badge-blue {
+        background: #1e3a8a;
+        color: #bfdbfe;
+    }
+
+    .badge-green {
+        background: #14532d;
+        color: #bbf7d0;
+    }
+
+    .badge-yellow {
+        background: #78350f;
+        color: #fde68a;
+    }
+
+    /* 聊天 */
+    .chat-box {
+        height: 430px;
+        overflow-y: auto;
+
+        background: #020617;
+        border: 1px solid #334155;
+        border-radius: 13px;
+
+        padding: 14px;
+        margin-bottom: 12px;
+    }
+
+    .message-item {
+        margin-bottom: 13px;
+        padding: 10px 12px;
+
+        background: #111827;
+        border: 1px solid #334155;
+        border-radius: 12px;
+    }
+
+    .message-author {
+        color: #60a5fa;
+        font-weight: bold;
+        font-size: 12px;
+        margin-bottom: 5px;
+    }
+
+    .message-content {
+        color: #e2e8f0;
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    .message-time {
+        color: #64748b;
+        font-size: 10px;
+        margin-top: 6px;
+    }
+
+    .chat-input-area {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 9px;
+    }
+
+    .chat-input {
+        width: 100%;
+        border: 1px solid #475569;
+        background: #0f172a;
+        color: white;
+
+        border-radius: 10px;
+        padding: 11px;
+        outline: none;
+    }
+
+    /* 成員 */
+    .member-list {
+        display: grid;
+        gap: 8px;
+    }
+
+    .member-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+
+        background: #111827;
+        border: 1px solid #334155;
+        border-radius: 11px;
+        padding: 10px;
+    }
+
+    .member-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+
+        background: #334155;
+        color: white;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        font-weight: bold;
+    }
+
+    .member-name {
+        color: white;
+        font-size: 13px;
+    }
+
+    .member-role {
+        color: #94a3b8;
+        font-size: 10px;
+        margin-top: 3px;
+    }
+
+    .empty-state {
+        padding: 30px;
+        text-align: center;
+        color: #94a3b8;
+    }
+
+    @media (max-width: 900px) {
+        .community-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .chat-input-area {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+
+<div class="community-page">
+
+    <header class="community-header">
+
+        <div class="community-header-inner">
+
+            <div class="community-title">
+
+                <h1>
+                    🏫 {{ community.name }}
+                </h1>
+
+                <p>
+                    {% if community.community_type == "club" %}
+                        校園社團
+                    {% elif community.community_type == "group" %}
+                        專題／群組
+                    {% else %}
+                        討論論壇
+                    {% endif %}
+
+                    ・
+
+                    {% if is_creator %}
+                        👑 你是建立者
+                    {% elif membership %}
+                        已加入
+                    {% endif %}
+                </p>
+
+            </div>
+
+            <div>
+
+                <a
+                    class="btn btn-secondary"
+                    href="/communities/"
+                >
+                    ← 返回社群
+                </a>
+
+                <a
+                    class="btn btn-secondary"
+                    href="/dashboard"
+                >
+                    🏠 首頁
+                </a>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="community-container">
+
+        <div class="community-layout">
+
+            <!-- 左邊 -->
+            <section>
+
+                <!-- 社群資訊 -->
+                <div class="panel">
+
+                    <h2>
+                        📌 社群資訊
+                    </h2>
+
+                    <div class="community-info">
+
+                        <div class="info-row">
+
+                            <div class="info-label">
+                                社群名稱
+                            </div>
+
+                            <div class="info-value">
+                                {{ community.name }}
+                            </div>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <div class="info-label">
+                                社群說明
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if community.description %}
+                                    {{ community.description }}
+                                {% else %}
+                                    建立者尚未填寫社群說明。
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <div class="info-label">
+                                社群類型
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if community.community_type == "club" %}
+
+                                    <span class="badge badge-blue">
+                                        社團
+                                    </span>
+
+                                {% elif community.community_type == "group" %}
+
+                                    <span class="badge badge-green">
+                                        群組
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge badge-yellow">
+                                        論壇
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="info-row">
+
+                            <div class="info-label">
+                                加入方式
+                            </div>
+
+                            <div class="info-value">
+
+                                {% if community.join_mode == "open" %}
+                                    公開加入
+
+                                {% elif community.join_mode == "approval" %}
+                                    需要管理員審核
+
+                                {% elif community.join_mode == "password" %}
+                                    需要密碼
+
+                                {% elif community.join_mode == "password_approval" %}
+                                    需要密碼與管理員審核
+
+                                {% else %}
+                                    未設定
+                                {% endif %}
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- 社群聊天室 -->
+                <div class="panel">
+
+                    <h2>
+                        💬 社群聊天室
+                    </h2>
+
+                    <div
+                        id="messageList"
+                        class="chat-box"
+                    >
+
+                        {% if messages %}
+
+                            {% for message in messages %}
+
+                            <div class="message-item">
+
+                                <div class="message-author">
+
+                                    {% if message.sender %}
+                                        {{ message.sender.full_name }}
+                                    {% else %}
+                                        未知使用者
+                                    {% endif %}
+
+                                </div>
+
+                                <div class="message-content">
+                                    {{ message.content }}
+                                </div>
+
+                                <div class="message-time">
+
+                                    {% if message.created_at %}
+
+                                        {{
+                                            message.created_at.strftime(
+                                                "%Y-%m-%d %H:%M"
+                                            )
+                                        }}
+
+                                    {% endif %}
+
+                                </div>
+
+                            </div>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <div class="empty-state">
+                                還沒有人聊天。<br>
+                                成為第一個發言的人吧！
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="chat-input-area">
+
+                        <input
+                            id="messageInput"
+                            class="chat-input"
+                            type="text"
+                            placeholder="輸入社群訊息..."
+                        >
+
+                        <button
+                            class="btn btn-primary"
+                            onclick="sendMessage()"
+                        >
+                            傳送
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- 右邊 -->
+            <aside>
+
+                <div class="panel">
+
+                    <h2>
+                        👥 社群成員
+                    </h2>
+
+                    <div class="member-list">
+
+                        {% if members %}
+
+                            {% for member in members %}
+
+                            <div class="member-item">
+
+                                <div class="member-avatar">
+
+                                    {% if member.user %}
+
+                                        {{
+                                            (
+                                                member.user.full_name
+                                                or "U"
+                                            )[0]
+                                        }}
+
+                                    {% else %}
+                                        U
+                                    {% endif %}
+
+                                </div>
+
+
+                                <div>
+
+                                    <div class="member-name">
+
+                                        {% if member.user %}
+                                            {{ member.user.full_name }}
+                                        {% else %}
+                                            未知使用者
+                                        {% endif %}
+
+                                    </div>
+
+
+                                    <div class="member-role">
+
+                                        {% if member.role == "owner" %}
+                                            👑 建立者
+
+                                        {% elif member.role == "admin" %}
+                                            管理員
+
+                                        {% else %}
+                                            成員
+                                        {% endif %}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            {% endfor %}
+
+                        {% else %}
+
+                            <div class="empty-state">
+                                尚無成員
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<script>
+    const communityId =
+        {{ community.id }};
+
+
+    async function sendMessage() {
+
+        const input =
+            document.getElementById(
+                "messageInput"
+            );
+
+        const content =
+            input.value.trim();
+
+        if (!content) {
+            return;
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `/communities/${communityId}/messages`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+                                content: content
+                            })
+                    }
+                );
+
+
+            const result =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !result.success
+            ) {
+
+                alert(
+                    result.message ||
+                    "訊息傳送失敗"
+                );
+
+                return;
+            }
+
+
+            input.value = "";
+
+            location.reload();
+
+
+        } catch (error) {
+
+            alert(
+                "傳送失敗：" +
+                error.message
+            );
+        }
+    }
+
+
+    document
+        .getElementById(
+            "messageInput"
+        )
+        .addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
+                    sendMessage();
+                }
+            }
+        );
+
+
+    const box =
+        document.getElementById(
+            "messageList"
+        );
+
+    if (box) {
+        box.scrollTop =
+            box.scrollHeight;
+    }
+</script>
+
+{% endblock %}
