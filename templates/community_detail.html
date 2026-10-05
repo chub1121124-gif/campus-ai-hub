@@ -7,362 +7,290 @@
 {% block content %}
 
 <style>
-        * {
-            box-sizing: border-box;
-        }
+    * {
+        box-sizing: border-box;
+    }
 
-        .community-page {
-            min-height: 100vh;
-            background: radial-gradient( circle at top left, rgba(37, 99, 235, .15), transparent 35% ), linear-gradient( 135deg, #020617, #0f172a 55%, #111827 );
-            color: #e2e8f0;
-            padding-bottom: 50px;
-        }
+    .community-page {
+        min-height: 100vh;
+        background: radial-gradient( circle at top left, rgba(37, 99, 235, .15), transparent 35% ), linear-gradient( 135deg, #020617, #0f172a 55%, #111827 );
+        color: #e2e8f0;
+        padding-bottom: 50px;
+    }
 
-        .community-header {
-            background: rgba(15, 23, 42, .96);
-            border-bottom: 1px solid #334155;
-            padding: 18px 0;
-        }
+    .community-header {
+        background: rgba(15, 23, 42, .96);
+        border-bottom: 1px solid #334155;
+        padding: 18px 0;
+    }
 
-        .community-header-inner,
-        .community-container {
-            width: min(1300px, 94%);
-            margin: 0 auto;
-        }
+    .community-header-inner,
+    .community-container {
+        width: min(1300px, 94%);
+        margin: 0 auto;
+    }
 
-        .community-header-inner {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
+    .community-header-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
 
-        .community-title h1 {
-            margin: 0;
+    .community-title h1 {
+        margin: 0;
+        color: white;
+        font-size: 25px;
+    }
+
+    .community-title p {
+        margin: 6px 0 0;
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .community-container {
+        padding-top: 22px;
+    }
+
+    .community-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 320px;
+        gap: 18px;
+        align-items: start;
+    }
+
+    .panel {
+        background: rgba(15, 23, 42, .96);
+        border: 1px solid #334155;
+        border-radius: 18px;
+        padding: 18px;
+        margin-bottom: 18px;
+    }
+
+        .panel h2 {
+            margin-top: 0;
             color: white;
-            font-size: 25px;
+            font-size: 19px;
         }
 
-        .community-title p {
-            margin: 6px 0 0;
-            color: #94a3b8;
-            font-size: 13px;
-        }
+    .btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
 
-        .community-container {
-            padding-top: 22px;
-        }
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
 
-        .community-layout {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) 320px;
-            gap: 18px;
-            align-items: start;
-        }
+    .btn-secondary {
+        background: #334155;
+        color: white;
+    }
 
-        .panel {
-            background: rgba(15, 23, 42, .96);
-            border: 1px solid #334155;
-            border-radius: 18px;
-            padding: 18px;
-            margin-bottom: 18px;
-        }
+    .btn-danger {
+        background: #dc2626;
+        color: white;
+    }
 
-            .panel h2 {
-                margin-top: 0;
-                color: white;
-                font-size: 19px;
-            }
+    .btn-success {
+        background: #16a34a;
+        color: white;
+    }
 
-        .btn {
-            border: 0;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .btn-primary {
-            background: #2563eb;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #334155;
-            color: white;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-            color: white;
-        }
-
-        .btn-success {
-            background: #16a34a;
-            color: white;
-        }
-
-
-        /* =====================================================
-       社團資訊
+    /* =====================================================
+       社群資訊
     ===================================================== */
 
-        .community-info {
-            display: grid;
-            gap: 12px;
-        }
+    .community-info {
+        display: grid;
+        gap: 12px;
+    }
 
-        .info-row {
-            background: #111827;
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 13px;
-        }
+    .info-row {
+        background: #111827;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 13px;
+    }
 
-        .info-label {
-            color: #64748b;
-            font-size: 11px;
-            margin-bottom: 5px;
-        }
+    .info-label {
+        color: #64748b;
+        font-size: 11px;
+        margin-bottom: 5px;
+    }
 
-        .info-value {
-            color: #e2e8f0;
-            line-height: 1.6;
-            font-size: 13px;
-        }
+    .info-value {
+        color: #e2e8f0;
+        line-height: 1.6;
+        font-size: 13px;
+    }
 
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 999px;
-            font-size: 11px;
-        }
+    .badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+    }
 
-        .badge-blue {
-            background: #1e3a8a;
-            color: #bfdbfe;
-        }
+    .badge-blue {
+        background: #1e3a8a;
+        color: #bfdbfe;
+    }
 
-        .badge-green {
-            background: #14532d;
-            color: #bbf7d0;
-        }
+    .badge-green {
+        background: #14532d;
+        color: #bbf7d0;
+    }
 
-        .badge-yellow {
-            background: #78350f;
-            color: #fde68a;
-        }
+    .badge-yellow {
+        background: #78350f;
+        color: #fde68a;
+    }
 
-
-        /* =====================================================
-       聊天
+    /* =====================================================
+       統一聊天室入口
     ===================================================== */
 
-        .chat-box {
-            height: 450px;
-            overflow-y: auto;
-            background: #020617;
-            border: 1px solid #334155;
-            border-radius: 13px;
-            padding: 14px;
-            margin-bottom: 12px;
-        }
+    .chat-entry {
+        background: linear-gradient( 135deg, rgba(37, 99, 235, .15), rgba(15, 23, 42, .95) );
+        border: 1px solid #334155;
+        border-radius: 15px;
+        padding: 22px;
+    }
 
-        .message-item {
-            margin-bottom: 13px;
-            padding: 10px 12px;
-            background: #111827;
-            border: 1px solid #334155;
-            border-radius: 12px;
-        }
+    .chat-entry-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 8px;
+    }
 
-        .message-top {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
+    .chat-entry-description {
+        color: #94a3b8;
+        line-height: 1.7;
+        font-size: 13px;
+        margin-bottom: 18px;
+    }
 
-        .message-author {
-            color: #60a5fa;
-            font-weight: bold;
-            font-size: 12px;
-        }
+    .chat-entry-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
 
-        .message-content {
-            color: #e2e8f0;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            margin-top: 6px;
-        }
-
-        .message-time {
-            color: #64748b;
-            font-size: 10px;
-            margin-top: 7px;
-        }
-
-        .recall-button {
-            border: 0;
-            background: transparent;
-            color: #f87171;
-            cursor: pointer;
-            font-size: 11px;
-        }
-
-        .chat-input {
-            width: 100%;
-            border: 1px solid #475569;
-            background: #0f172a;
-            color: white;
-            border-radius: 10px;
-            padding: 11px;
-            outline: none;
-        }
-
-        .chat-input-area {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: 9px;
-        }
-
-        .file-area {
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .file-input {
-            flex: 1;
-            min-width: 220px;
-            background: #111827;
-            border: 1px solid #475569;
-            border-radius: 10px;
-            padding: 8px;
-            color: #cbd5e1;
-        }
-
-        .attachment-image {
-            display: block;
-            max-width: 320px;
-            max-height: 260px;
-            margin-top: 9px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            object-fit: contain;
-        }
-
-        .attachment-file {
-            margin-top: 9px;
-            padding: 11px;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 10px;
-        }
-
-        .attachment-name {
-            word-break: break-all;
-            margin-bottom: 8px;
-        }
-
-
-        /* =====================================================
+    /* =====================================================
        成員 / 審核
     ===================================================== */
 
-        .member-list,
-        .request-list {
+    .member-list,
+    .request-list {
+        display: grid;
+        gap: 8px;
+    }
+
+    .member-item,
+    .request-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        background: #111827;
+        border: 1px solid #334155;
+        border-radius: 11px;
+        padding: 10px;
+    }
+
+    .member-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: #334155;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .member-name {
+        color: white;
+        font-size: 13px;
+    }
+
+    .member-role {
+        color: #94a3b8;
+        font-size: 10px;
+        margin-top: 3px;
+    }
+
+    .request-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .request-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 9px;
+        flex-wrap: wrap;
+    }
+
+    .empty-state {
+        padding: 25px 10px;
+        text-align: center;
+        color: #94a3b8;
+    }
+
+    @media (max-width: 900px) {
+        .community-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .community-header-inner {
+            align-items: stretch;
+        }
+
+            .community-header-inner > div:last-child {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .community-header-inner .btn {
+                flex: 1;
+            }
+
+        .chat-entry-actions {
             display: grid;
-            gap: 8px;
+            grid-template-columns: 1fr;
         }
 
-        .member-item,
-        .request-item {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            background: #111827;
-            border: 1px solid #334155;
-            border-radius: 11px;
-            padding: 10px;
-        }
-
-        .member-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: #334155;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .member-name {
-            color: white;
-            font-size: 13px;
-        }
-
-        .member-role {
-            color: #94a3b8;
-            font-size: 10px;
-            margin-top: 3px;
-        }
-
-        .request-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .request-actions {
-            display: flex;
-            gap: 6px;
-            margin-top: 9px;
-            flex-wrap: wrap;
-        }
-
-        .empty-state {
-            padding: 25px 10px;
-            text-align: center;
-            color: #94a3b8;
-        }
-
-
-        @media (max-width: 900px) {
-
-            .community-layout {
-                grid-template-columns: 1fr;
+            .chat-entry-actions .btn {
+                width: 100%;
             }
-        }
-
-        @media (max-width: 600px) {
-
-            .chat-input-area {
-                grid-template-columns: 1fr;
-            }
-
-            .file-area {
-                display: grid;
-            }
-
-            .attachment-image {
-                max-width: 100%;
-            }
-        }
+    }
 </style>
 
 
 <div class="community-page">
+
+    <!-- =====================================================
+         頂部
+    ====================================================== -->
 
     <header class="community-header">
 
@@ -371,7 +299,15 @@
             <div class="community-title">
 
                 <h1>
-                    🏫 {{ community.name }}
+                    {% if community.community_type == "club" %}
+                    🏫
+                    {% elif community.community_type == "group" %}
+                    👥
+                    {% else %}
+                    💬
+                    {% endif %}
+
+                    {{ community.name }}
                 </h1>
 
                 <p>
@@ -402,10 +338,21 @@
 
             <div>
 
+                {% if is_creator or membership %}
+
+                <a class="btn btn-primary"
+                   href="/chat?community_id={{ community.id }}">
+                    💬 進入聊天室
+                </a>
+
+                {% endif %}
+
+
                 <a class="btn btn-secondary"
                    href="/communities/">
                     ← 返回社群
                 </a>
+
 
                 <a class="btn btn-secondary"
                    href="/dashboard">
@@ -419,25 +366,32 @@
     </header>
 
 
+    <!-- =====================================================
+         主要內容
+    ====================================================== -->
+
     <main class="community-container">
 
         <div class="community-layout">
 
 
-            <!-- ===================================================
+            <!-- =====================================================
                  左側
-            =================================================== -->
+            ====================================================== -->
 
             <section>
 
 
-                <!-- 社團資訊 -->
+                <!-- =================================================
+                     社群資訊
+                ================================================== -->
 
                 <div class="panel">
 
                     <h2>📌 社群資訊</h2>
 
                     <div class="community-info">
+
 
                         <div class="info-row">
 
@@ -486,19 +440,19 @@
                                 {% if community.community_type == "club" %}
 
                                 <span class="badge badge-blue">
-                                    社團
+                                    🏫 社團
                                 </span>
 
                                 {% elif community.community_type == "group" %}
 
                                 <span class="badge badge-green">
-                                    群組
+                                    👥 群組
                                 </span>
 
                                 {% else %}
 
                                 <span class="badge badge-yellow">
-                                    論壇
+                                    💬 論壇
                                 </span>
 
                                 {% endif %}
@@ -532,6 +486,10 @@
 
                                 需要密碼與建立者審核
 
+                                {% else %}
+
+                                公開加入
+
                                 {% endif %}
 
                             </div>
@@ -543,232 +501,98 @@
                 </div>
 
 
-                <!-- ===================================================
-                     聊天室
-                =================================================== -->
+                <!-- =================================================
+                     統一聊天室
+                ================================================== -->
+                {% if is_creator or membership %}
 
                 <div class="panel">
 
-                    <h2>💬 社群聊天室</h2>
+                    <h2>💬 聊天室</h2>
 
+                    <div class="chat-entry">
 
-                    <div id="messageList"
-                         class="chat-box">
+                        <div class="chat-entry-title">
 
-                        {% if messages %}
+                            {% if community.community_type == "club" %}
+                            🏫 {{ community.name }} 社團聊天室
 
-                        {% for message in messages %}
-
-                        <div class="message-item">
-
-                            <div class="message-top">
-
-                                <div class="message-author">
-
-                                    {% if message.sender %}
-
-                                    {{ message.sender.full_name }}
-
-                                    {% else %}
-
-                                    未知使用者
-
-                                    {% endif %}
-
-                                </div>
-
-
-                                {% if
-                                current_user
-                                and
-                                message.sender_id ==
-                                current_user.id
-                                %}
-
-                                <button type="button"
-                                        class="recall-button"
-                                        onclick="
-                            recallMessage(
-                                {{ message.id }}
-                            )
-                        ">
-                                    收回
-                                </button>
-
-                                {% endif %}
-
-                            </div>
-
-
-                            {% if message.message_type == "image" %}
-
-                            <div class="message-content">
-                                🖼️ {{ message.file_name or "圖片" }}
-                            </div>
-
-                            <a href="{{ message.file_url }}"
-                               target="_blank"
-                               rel="noopener">
-
-                                <img class="attachment-image"
-                                     src="{{ message.file_url }}"
-                                     alt="{{ message.file_name }}">
-
-                            </a>
-
-                            <div class="file-area">
-
-                                <a class="btn btn-secondary"
-                                   href="{{ message.file_url }}"
-                                   target="_blank"
-                                   rel="noopener">
-                                    👁 開啟
-                                </a>
-
-                                <a class="btn btn-primary"
-                                   href="{{ url_for(
-                                       'community.download_community_file',
-                                       community_id=community.id,
-                                       message_id=message.id
-                                   ) }}">
-                                    ⬇️ 下載
-                                </a>
-
-                            </div>
-
-
-                            {% elif message.message_type == "file" %}
-
-                            <div class="attachment-file">
-
-                                <div class="attachment-name">
-
-                                    📎
-                                    {{ message.file_name or "附件" }}
-
-                                </div>
-
-                                <div class="file-area">
-
-                                    <a class="btn btn-secondary"
-                                       href="{{ message.file_url }}"
-                                       target="_blank"
-                                       rel="noopener">
-                                        開啟
-                                    </a>
-
-                                    <a class="btn btn-primary"
-                                       href="{{ url_for(
-                                            'community.download_community_file',
-                                            community_id=community.id,
-                                            message_id=message.id
-                                        ) }}">
-                                        ⬇️ 下載
-                                    </a>
-
-                                </div>
-
-                            </div>
-
+                            {% elif community.community_type == "group" %}
+                            👥 {{ community.name }} 群組聊天室
 
                             {% else %}
-
-                            <div class="message-content">
-
-                                {{ message.content }}
-
-                            </div>
-
+                            💬 {{ community.name }} 聊天室
                             {% endif %}
 
-
-                            <div class="message-time">
-
-                                {% if message.created_at %}
-
-                                {{
-                            message.created_at.strftime(
-                                "%Y-%m-%d %H:%M"
-                            )
-                                }}
-
-                                {% endif %}
-
-                            </div>
-
                         </div>
 
-                        {% endfor %}
 
 
-                        {% else %}
 
-                        <div class="empty-state">
 
-                            還沒有人聊天。<br>
-                            成為第一個發言的人吧！
+                        <div class="chat-entry-actions">
+
+                            <a class="btn btn-primary"
+                               href="/chat?community_id={{ community.id }}">
+                                💬 立即進入聊天室
+                            </a>
+
+                            {% if membership and not is_creator %}
+                            <button type="button"
+                                    class="btn btn-danger"
+                                    onclick="leaveCommunity()">
+                                🚪 退出{{ "社團" if community.community_type == "club" else "群組" }}
+                            </button>
+                            {% endif %}
 
                         </div>
-
-                        {% endif %}
-
-                    </div>
-
-
-                    <!-- 文字 -->
-
-                    <div class="chat-input-area">
-
-                        <input id="messageInput"
-                               class="chat-input"
-                               type="text"
-                               placeholder="輸入社群訊息...">
-
-                        <button type="button"
-                                class="btn btn-primary"
-                                onclick="sendMessage()">
-                            傳送
-                        </button>
-
-                    </div>
-
-
-                    <!-- 附件 -->
-
-                    <div class="file-area">
-
-                        <input id="chatFile"
-                               class="file-input"
-                               type="file">
-
-                        <button type="button"
-                                class="btn btn-secondary"
-                                onclick="uploadFile()">
-                            📎 上傳附件
-                        </button>
 
                     </div>
 
                 </div>
+
+
+                {% else %}
+
+
+                <div class="panel">
+
+                    <h2>💬 聊天室</h2>
+
+                    <div class="empty-state">
+
+                        你目前尚未加入此社群。
+
+                        <br><br>
+
+                        加入社群後即可使用聊天室。
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
 
             </section>
 
 
-            <!-- ===================================================
+            <!-- =====================================================
                  右側
-            =================================================== -->
+            ====================================================== -->
 
             <aside>
 
 
-                <!-- ===================================================
+                <!-- =================================================
                      建立者審核
-                =================================================== -->
+                ================================================== -->
                 {% if is_creator %}
 
                 <div class="panel">
 
                     <h2>
+
                         📨 待審核加入申請
 
                         <span id="requestCount"
@@ -794,9 +618,9 @@
                 {% endif %}
 
 
-                <!-- ===================================================
-                     成員
-                =================================================== -->
+                <!-- =================================================
+                     社群成員
+                ================================================== -->
 
                 <div class="panel">
 
@@ -807,19 +631,24 @@
 
                         {% if members %}
 
+
                         {% for member in members %}
 
                         <div class="member-item">
+
 
                             <div class="member-avatar">
 
                                 {% if member.user %}
 
                                 {{
-                            (
-                                member.user.full_name
-                                or "U"
-                            )[0]
+                                            (
+                                                member.user.full_name
+                                                or
+                                                member.user.username
+                                                or
+                                                "U"
+                                            )[0]
                                 }}
 
                                 {% else %}
@@ -837,7 +666,13 @@
 
                                     {% if member.user %}
 
-                                    {{ member.user.full_name }}
+                                    {{
+                                                member.user.full_name
+                                                or
+                                                member.user.username
+                                                or
+                                                "未知使用者"
+                                    }}
 
                                     {% else %}
 
@@ -856,7 +691,7 @@
 
                                     {% elif member.role == "admin" %}
 
-                                    管理員
+                                    🛡️ 管理員
 
                                     {% else %}
 
@@ -897,8 +732,7 @@
 
 <script>
 
-const communityId =
-    {{ community.id }};
+const communityId = {{ community.id }};
 
 
 /* =====================================================
@@ -918,226 +752,11 @@ function escapeHTML(value) {
 
 
 /* =====================================================
-   傳送文字
-===================================================== */
-
-async function sendMessage() {
-
-    const input =
-        document.getElementById(
-            "messageInput"
-        );
-
-    const content =
-        input.value.trim();
-
-    if (!content) {
-        return;
-    }
-
-    try {
-
-        const response =
-            await fetch(
-                `/communities/${communityId}/messages`,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        content: content
-                    })
-                }
-            );
-
-        const result =
-            await response.json();
-
-        if (
-            !response.ok ||
-            !result.success
-        ) {
-
-            alert(
-                result.message ||
-                "訊息傳送失敗"
-            );
-
-            return;
-        }
-
-        input.value = "";
-
-        location.reload();
-
-    } catch (error) {
-
-        alert(
-            "傳送失敗：" +
-            error.message
-        );
-    }
-}
-
-
-/* Enter 傳送 */
-
-document
-    .getElementById(
-        "messageInput"
-    )
-    .addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key ===
-                "Enter"
-            ) {
-
-                event.preventDefault();
-
-                sendMessage();
-            }
-        }
-    );
-
-
-/* =====================================================
-   上傳附件
-===================================================== */
-
-async function uploadFile() {
-
-    const input =
-        document.getElementById(
-            "chatFile"
-        );
-
-    const file =
-        input.files[0];
-
-    if (!file) {
-
-        alert(
-            "請先選擇附件"
-        );
-
-        return;
-    }
-
-    const formData =
-        new FormData();
-
-    formData.append(
-        "file",
-        file
-    );
-
-    try {
-
-        const response =
-            await fetch(
-                `/communities/${communityId}/messages/upload`,
-                {
-                    method: "POST",
-                    body: formData
-                }
-            );
-
-        const result =
-            await response.json();
-
-        if (
-            !response.ok ||
-            !result.success
-        ) {
-
-            alert(
-                result.message ||
-                "附件上傳失敗"
-            );
-
-            return;
-        }
-
-        input.value = "";
-
-        location.reload();
-
-    } catch (error) {
-
-        alert(
-            "附件上傳失敗：" +
-            error.message
-        );
-    }
-}
-
-
-/* =====================================================
-   收回訊息
-===================================================== */
-
-async function recallMessage(
-    messageId
-) {
-
-    if (
-        !confirm(
-            "確定要收回這則訊息嗎？"
-        )
-    ) {
-        return;
-    }
-
-    try {
-
-        const response =
-            await fetch(
-                `/communities/${communityId}/messages/${messageId}`,
-                {
-                    method: "DELETE"
-                }
-            );
-
-        const result =
-            await response.json();
-
-        if (
-            !response.ok ||
-            !result.success
-        ) {
-
-            alert(
-                result.message ||
-                "收回失敗"
-            );
-
-            return;
-        }
-
-        location.reload();
-
-    } catch (error) {
-
-        alert(
-            "收回失敗：" +
-            error.message
-        );
-    }
-}
-
-
-/* =====================================================
    建立者審核
 ===================================================== */
 
 {% if is_creator %}
+
 
 async function loadJoinRequests() {
 
@@ -1151,6 +770,12 @@ async function loadJoinRequests() {
             "requestCount"
         );
 
+
+    if (!list || !count) {
+        return;
+    }
+
+
     try {
 
         const response =
@@ -1158,8 +783,10 @@ async function loadJoinRequests() {
                 `/communities/${communityId}/join-requests`
             );
 
+
         const result =
             await response.json();
+
 
         if (
             !response.ok ||
@@ -1172,16 +799,23 @@ async function loadJoinRequests() {
             );
         }
 
+
         const requests =
             result.data || [];
+
 
         if (!requests.length) {
 
             list.innerHTML = `
+
                 <div class="empty-state">
+
                     目前沒有待審核的加入申請
+
                 </div>
+
             `;
+
 
             count.style.display =
                 "none";
@@ -1189,23 +823,30 @@ async function loadJoinRequests() {
             return;
         }
 
+
         count.textContent =
             requests.length;
+
 
         count.style.display =
             "inline-block";
 
+
         list.innerHTML = "";
 
+
         requests.forEach(item => {
+
 
             const card =
                 document.createElement(
                     "div"
                 );
 
+
             card.className =
                 "request-item";
+
 
             const initial =
                 (
@@ -1213,14 +854,18 @@ async function loadJoinRequests() {
                     "U"
                 ).charAt(0);
 
+
             card.innerHTML = `
+
                 <div class="member-avatar">
 
                     ${escapeHTML(initial)}
 
                 </div>
 
+
                 <div class="request-info">
+
 
                     <div class="member-name">
 
@@ -1230,6 +875,7 @@ async function loadJoinRequests() {
                         )}
 
                     </div>
+
 
                     <div class="member-role">
 
@@ -1246,6 +892,7 @@ async function loadJoinRequests() {
                         }
 
                         申請時間：
+
                         ${escapeHTML(
                             item.created_at ||
                             "-"
@@ -1253,7 +900,9 @@ async function loadJoinRequests() {
 
                     </div>
 
+
                     <div class="request-actions">
+
 
                         <button
                             type="button"
@@ -1267,6 +916,7 @@ async function loadJoinRequests() {
                             ✓ 同意
                         </button>
 
+
                         <button
                             type="button"
                             class="btn btn-danger"
@@ -1279,30 +929,44 @@ async function loadJoinRequests() {
                             ✕ 拒絕
                         </button>
 
+
                     </div>
 
                 </div>
+
             `;
+
 
             list.appendChild(
                 card
             );
+
         });
+
 
     } catch (error) {
 
+
         list.innerHTML = `
+
             <div class="empty-state">
+
                 ${escapeHTML(
                     error.message
                 )}
+
             </div>
+
         `;
+
     }
+
 }
 
 
-/* 同意 */
+/* =====================================================
+   同意加入
+===================================================== */
 
 async function approveRequest(
     requestId
@@ -1313,42 +977,60 @@ async function approveRequest(
             "確定同意這位使用者加入？"
         )
     ) {
+
         return;
+
     }
+
 
     try {
 
+
         const response =
             await fetch(
+
                 `/communities/${communityId}/join-requests/${requestId}/approve`,
+
                 {
                     method: "POST"
                 }
+
             );
+
 
         const result =
             await response.json();
+
 
         alert(
             result.message ||
             "處理完成"
         );
 
+
         if (result.success) {
+
             location.reload();
+
         }
 
+
     } catch (error) {
+
 
         alert(
             "審核失敗：" +
             error.message
         );
+
     }
+
 }
 
 
-/* 拒絕 */
+/* =====================================================
+   拒絕加入
+===================================================== */
 
 async function rejectRequest(
     requestId
@@ -1359,61 +1041,86 @@ async function rejectRequest(
             "確定拒絕這個加入申請？"
         )
     ) {
+
         return;
+
     }
+
 
     try {
 
+
         const response =
             await fetch(
+
                 `/communities/${communityId}/join-requests/${requestId}/reject`,
+
                 {
                     method: "POST"
                 }
+
             );
+
 
         const result =
             await response.json();
+
 
         alert(
             result.message ||
             "處理完成"
         );
 
+
         if (result.success) {
+
             loadJoinRequests();
+
         }
 
+
     } catch (error) {
+
 
         alert(
             "審核失敗：" +
             error.message
         );
+
     }
+
 }
 
 
 loadJoinRequests();
 
+
 {% endif %}
 
 
+
 /* =====================================================
-   自動捲到底部
+   退出社團 / 群組
 ===================================================== */
+async function leaveCommunity() {
+    const typeName = {{ ('"社團"' if community.community_type == 'club' else '"群組"') | safe }};
+    if (!confirm(`確定要退出這個${typeName}嗎？退出後需要重新加入才能再次進入聊天室。`)) {
+        return;
+    }
 
-const messageBox =
-    document.getElementById(
-        "messageList"
-    );
-
-if (messageBox) {
-
-    messageBox.scrollTop =
-        messageBox.scrollHeight;
+    try {
+        const response = await fetch(`/communities/${communityId}/leave`, {
+            method: "POST"
+        });
+        const result = await response.json();
+        alert(result.message || "處理完成");
+        if (response.ok && result.success) {
+            window.location.href = "/communities/";
+        }
+    } catch (error) {
+        alert("退出失敗：" + error.message);
+    }
 }
-
 </script>
 
 {% endblock %}
