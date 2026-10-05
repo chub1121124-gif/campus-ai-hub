@@ -1,5 +1,5 @@
 from .user import Department, User
-from .post import Post
+from .post import Post, PostAttachment
 from .note import Note, NoteAttachment
 from .friendship import Friendship
 from .chat import ChatRoom, ChatRoomMember, ChatJoinRequest, ChatMessage
@@ -10,6 +10,7 @@ __all__ = [
     "Department",
     "User",
     "Post",
+    "PostAttachment",
     "Note",
     "NoteAttachment",
     "Friendship",
