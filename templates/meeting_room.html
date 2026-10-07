@@ -418,7 +418,100 @@
     }
 </style>
 
+<style>
+    /* ===== Mobile meeting fixes ===== */
+    html, body {
+        min-height: 100%;
+    }
 
+    body {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .meeting-page {
+        min-height: 100dvh !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding-bottom: calc(120px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .prejoin {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        align-items: flex-start !important;
+    }
+
+    .prebox {
+        margin: auto 0;
+    }
+
+    @media (max-width: 600px) {
+        .prejoin {
+            padding: 10px !important;
+        }
+
+        .prebox {
+            padding: 14px !important;
+            border-radius: 16px !important;
+        }
+
+        .pregrid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .preview {
+            min-height: 0 !important;
+            height: min(42dvh, 300px) !important;
+        }
+
+            .preview video {
+                min-height: 0 !important;
+                height: 100% !important;
+            }
+
+        .meeting-container {
+            width: 94% !important;
+            margin: 12px auto !important;
+        }
+
+        .participants-panel {
+            order: 2 !important;
+            max-height: none !important;
+        }
+
+        .video-area {
+            order: 1 !important;
+        }
+
+        .video-card, .video-card video {
+            min-height: 0 !important;
+            height: min(52dvh, 360px) !important;
+        }
+
+        .meeting-controls {
+            left: 8px !important;
+            right: 8px !important;
+            bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+            transform: none !important;
+            width: auto !important;
+            max-height: 32dvh;
+            overflow-y: auto;
+            flex-wrap: nowrap !important;
+            justify-content: flex-start !important;
+        }
+
+        .control-btn {
+            flex: 0 0 auto;
+            min-width: 88px !important;
+        }
+
+        .creator-dialog {
+            overflow-y: auto;
+            padding: 12px;
+        }
+    }
+</style>
 
 <div id="prejoin" class="prejoin">
     <div class="prebox">
@@ -430,7 +523,7 @@
                 {% if meeting.meeting_type == "video" %}<button id="preCam" class="prebtn">📷 攝影機：開啟</button>{% endif %}
                 <div class="device"><label>麥克風</label><select id="audioDevice"><option value="">預設麥克風</option></select></div>
                 {% if meeting.meeting_type == "video" %}<div class="device"><label>攝影機</label><select id="videoDevice"><option value="">預設攝影機</option></select></div>{% endif %}
-                <div id="preStatus" class="prestatus">正在準備裝置…</div><button id="joinNow" class="joinnow">加入會議</button><button id="cancelPre" class="cancelpre">返回會議列表</button>
+                <div id="preStatus" class="prestatus">正在準備裝置…</div><button id="joinNow" class="joinnow">確認加入會議</button><button id="cancelPre" class="cancelpre">返回會議列表</button>
             </div>
         </div>
     </div>
@@ -1082,15 +1175,31 @@ function leaveMeeting(closeAll) {
     if (isLeaving) return;
     isLeaving = true;
 
-    if (socket.connected) {
-        socket.emit("leave_meeting", {
-            meeting_id: meetingId,
-            close_for_all: closeAll
-        });
+    const finishLeave = () => {
+        stopEverything();
+        location.href = "/meetings/";
+    };
+
+    if (!socket.connected) {
+        finishLeave();
+        return;
     }
 
-    stopEverything();
-    setTimeout(() => location.href = "/meetings/", 250);
+    // 等伺服器完成「離開 / 最後一人結束會議」後再跳頁，
+    // 避免手機網路較慢時 emit 還沒送完就 disconnect。
+    socket.timeout(3000).emit(
+        "leave_meeting",
+        {
+            meeting_id: meetingId,
+            close_for_all: closeAll
+        },
+        () => finishLeave()
+    );
+
+    // Socket.IO timeout callback 在不同環境可能沒有回來，保底離開。
+    setTimeout(() => {
+        if (isLeaving) finishLeave();
+    }, 3500);
 }
 
 function stopEverything() {

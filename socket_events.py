@@ -381,11 +381,12 @@ def leave_internal(mid, uid, close_all=False, sid=None):
 def leave_event(data):
     u = get_user()
     if not u:
-        return
+        return {"success": False, "message": "請先登入"}
+
     try:
         mid = int((data or {}).get("meeting_id"))
     except (TypeError, ValueError):
-        return
+        return {"success": False, "message": "會議編號錯誤"}
 
     leave_internal(
         mid,
@@ -393,6 +394,9 @@ def leave_event(data):
         bool((data or {}).get("close_for_all", False)),
         request.sid,
     )
+
+    # 回覆前端 ACK；前端收到後才跳回會議列表。
+    return {"success": True}
 
 
 @socketio.on("disconnect")
