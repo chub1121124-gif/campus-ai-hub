@@ -513,6 +513,112 @@
     }
 </style>
 
+
+<style>
+    /* Focus view: independent from WebRTC signalling */
+    .video-card {
+        cursor: pointer;
+    }
+
+        .video-card:focus-visible {
+            outline: 3px solid #60a5fa;
+            outline-offset: 3px;
+        }
+
+    .video-focus-hint {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        z-index: 2;
+        border: 1px solid #64748b;
+        background: rgba(15,23,42,.85);
+        color: #fff;
+        border-radius: 9px;
+        padding: 7px 10px;
+        font-size: 12px;
+        pointer-events: none;
+    }
+
+    .focus-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        background: #000;
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+        .focus-overlay.active {
+            display: flex;
+        }
+
+    .focus-toolbar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 3;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: calc(12px + env(safe-area-inset-top)) 14px 12px;
+        background: linear-gradient(to bottom,rgba(0,0,0,.8),transparent);
+        color: #fff;
+    }
+
+        .focus-toolbar button {
+            border: 1px solid #64748b;
+            border-radius: 10px;
+            background: rgba(15,23,42,.9);
+            color: #fff;
+            padding: 9px 13px;
+            cursor: pointer;
+        }
+
+        .focus-toolbar .focus-title {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-weight: 700;
+        }
+
+    .focus-video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: #000;
+    }
+
+    .focus-help {
+        position: absolute;
+        bottom: calc(12px + env(safe-area-inset-bottom));
+        left: 0;
+        right: 0;
+        text-align: center;
+        color: #cbd5e1;
+        font-size: 12px;
+        pointer-events: none;
+    }
+
+    @media (orientation:landscape) and (max-height:600px) {
+        .focus-toolbar {
+            padding: 6px 14px;
+        }
+
+        .focus-help {
+            display: none;
+        }
+    }
+</style>
+
+<div id="focusOverlay" class="focus-overlay" role="dialog" aria-modal="true" aria-label="放大視訊畫面">
+    <div class="focus-toolbar"><span id="focusTitle" class="focus-title">放大視訊</span><div><button id="focusLandscape" type="button">⛶ 全螢幕／橫向</button> <button id="focusClose" type="button">✕ 返回會議</button></div></div>
+    <video id="focusVideo" class="focus-video" autoplay playsinline></video>
+    <div class="focus-help">可將手機橫放觀看，點「返回會議」縮小</div>
+</div>
+
 <div id="prejoin" class="prejoin">
     <div class="prebox">
         <h2>加入會議前確認</h2><p>確認自己的畫面與裝置後，再正式加入會議。</p>
@@ -889,6 +995,80 @@ function createPeer(sid, user) {
     return pc;
 }
 
+
+// ===== Focus view: local/remote video, no new peer connection =====
+let focusedCard = null;
+let focusOriginalMuted = null;
+const focusOverlay = E("focusOverlay");
+const focusVideo = E("focusVideo");
+
+function attachVideoFocus(card) {
+    if (!card || card.dataset.focusReady === "1") return;
+    card.dataset.focusReady = "1";
+    card.tabIndex = 0;
+    card.setAttribute("role", "button");
+    card.setAttribute("aria-label", "放大此視訊畫面");
+    const hint = document.createElement("span");
+    hint.className = "video-focus-hint";
+    hint.textContent = "⛶ 點選放大";
+    card.appendChild(hint);
+    card.addEventListener("click", () => openVideoFocus(card));
+    card.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault(); openVideoFocus(card);
+        }
+    });
+}
+
+function openVideoFocus(card) {
+    const sourceVideo = card?.querySelector("video");
+    if (!sourceVideo?.srcObject) return;
+    if (focusedCard) closeVideoFocus();
+    focusedCard = card;
+    focusOriginalMuted = sourceVideo.muted;
+    const name = card.querySelector(".video-name")?.textContent?.trim() || "視訊畫面";
+    E("focusTitle").textContent = name;
+    focusVideo.srcObject = sourceVideo.srcObject;
+    // Only one playback path produces remote audio while expanded.
+    sourceVideo.muted = true;
+    focusVideo.muted = card.id === "localVideoCard";
+    focusOverlay.classList.add("active");
+    document.body.style.overflow = "hidden";
+    focusVideo.play().catch(() => {});
+}
+
+async function closeVideoFocus() {
+    if (!focusedCard) return;
+    const original = focusedCard.querySelector("video");
+    if (original && focusOriginalMuted !== null) original.muted = focusOriginalMuted;
+    focusedCard = null;
+    focusOriginalMuted = null;
+    focusVideo.pause();
+    focusVideo.srcObject = null;
+    focusOverlay.classList.remove("active");
+    document.body.style.overflow = "";
+    try { if (document.fullscreenElement === focusOverlay) await document.exitFullscreen(); } catch (_) {}
+    try { if (screen.orientation?.unlock) screen.orientation.unlock(); } catch (_) {}
+}
+
+E("focusClose").addEventListener("click", closeVideoFocus);
+E("focusLandscape").addEventListener("click", async () => {
+    try {
+        if (focusOverlay.requestFullscreen && document.fullscreenElement !== focusOverlay) {
+            await focusOverlay.requestFullscreen();
+        }
+    } catch (e) { console.info("Fullscreen unavailable:", e); }
+    try { if (screen.orientation?.lock) await screen.orientation.lock("landscape"); }
+    catch (e) { console.info("Rotate device manually:", e); }
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeVideoFocus(); });
+document.addEventListener("fullscreenchange", () => {
+    if (focusedCard && !document.fullscreenElement) {
+        try { screen.orientation?.unlock?.(); } catch (_) {}
+    }
+});
+attachVideoFocus(E("localVideoCard"));
+
 function showRemoteVideo(sid, user, stream) {
     let card = E(`remote-${sid}`);
 
@@ -903,9 +1083,11 @@ function showRemoteVideo(sid, user, stream) {
     }
 
     card.querySelector("video").srcObject = stream;
+    attachVideoFocus(card);
 }
 
 function removePeer(sid) {
+    if (focusedCard?.id === `remote-${sid}`) closeVideoFocus();
     peers.get(sid)?.close();
     peers.delete(sid);
     iceQueue.delete(sid);
@@ -1203,6 +1385,7 @@ function leaveMeeting(closeAll) {
 }
 
 function stopEverything() {
+    if (focusedCard) closeVideoFocus();
     clearTimeout(joinTimer);
     localStream?.getTracks().forEach(t => t.stop());
     screenStream?.getTracks().forEach(t => t.stop());
